@@ -8,7 +8,7 @@ source venv/Script/activate
 # Instal·lacions
 
 ```bash
-pip install fastapi uvicorn sqlalchemy psycopg2 fastapi-utils
+pip install fastapi uvicorn sqlalchemy psycopg2 fastapi-utils pymysql python-dotenv
 ```
 
 # Freeze dels requirements
@@ -23,6 +23,9 @@ uvicorn entrypoint:app --reload
 ```
 Funciona com a "healthcheck".
 
+* Servidor: `http://127.0.0.1:8000`
+* Documentació: `http://127.0.0.1:8000/docs`
+
 # Iniciar Git i primer commit
 
 ```bash
@@ -32,7 +35,3 @@ git commit -m "first commit"
 
 ```
 També he creat un arxiu .gitignore per ignorar la carpeta de l'entorn virtual i els arxius compilats/caché de python generats automàticament.
-
-* Servidor: `http://127.0.0.1:8000`
-* Documentació: `http://127.0.0.1:8000/docs`
-
