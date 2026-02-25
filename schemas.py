@@ -1,6 +1,6 @@
 from datetime import date, datetime
 from pydantic import BaseModel, ConfigDict
-from typing import Literal
+from typing import Literal, Optional
 
 
 class CarroResponse(BaseModel):
@@ -17,6 +17,12 @@ class ReservaCreate(BaseModel):
     usuari_id: int
     data_inici: datetime
     data_final: datetime
+
+class ReservaUpdate(BaseModel):
+    carro_id: Optional[int] = None
+    usuari_id: Optional[int] = None
+    data_inici: Optional[datetime] = None
+    data_final: Optional[datetime] = None
 
 class ReservaPeriodeResponse(BaseModel):
     nom_carro: str

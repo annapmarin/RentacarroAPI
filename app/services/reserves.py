@@ -1,8 +1,9 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from datetime import datetime, timedelta
 from fastapi import HTTPException
 from models import Carro, Reserves, Usuaris
-from schemas import ReservaCreate
+from schemas import ReservaCreate, ReservaUpdate
 
 def get_reserves_per_periode(db: Session, data: str):
     try:
@@ -67,3 +68,66 @@ def crear_nova_reserva(db: Session, payload: ReservaCreate):
     db.commit()
 
     return {"msg": "Reserva creada amb èxit"}
+
+def modificar_reserva(db: Session, carro_id: int, data_inici: datetime, payload: ReservaUpdate):
+    data_inici = data_inici.replace(tzinfo=None)
+
+    # Comprovar que la reserva existeix
+    reserva = (
+        db.query(Reserves)
+        .filter(
+            Reserves.carro_id == carro_id,
+            func.date(Reserves.data_inici) == data_inici.date()
+        )
+        .first()
+    )
+
+    if not reserva:
+        raise HTTPException(status_code=404, detail="No s'ha trobat la reserva a modificar")
+
+    # Calcular valors finals
+    nou_carro_id = payload.carro_id if payload.carro_id is not None else reserva.carro_id
+    nou_usuari_id = payload.usuari_id if payload.usuari_id is not None else reserva.usuari_id
+    nova_data_inici = payload.data_inici.replace(tzinfo=None) if payload.data_inici is not None else reserva.data_inici
+    nova_data_final = payload.data_final.replace(tzinfo=None) if payload.data_final is not None else reserva.data_final
+    
+    # Comprovar dates
+    if nova_data_final <= nova_data_inici:
+        raise HTTPException(status_code=400, detail="La data final ha de ser posterior a la data d'inici")
+    
+    # Comprovar que el nou carro existeix
+    if payload.carro_id is not None:
+        carro = db.query(Carro).filter(Carro.id == payload.carro_id).first()
+        if not carro:
+            raise HTTPException(status_code=404, detail="El carro no existeix")
+        
+    # Comprovar que el nou usuari existeix
+    if payload.usuari_id is not None:
+        usuari = db.query(Usuaris).filter(Usuaris.id == payload.usuari_id).first()
+        if not usuari:
+            raise HTTPException(status_code=404, detail="L'usuari no existeix")
+
+    # Comprovar solapaments
+    solapa = (
+        db.query(Reserves)
+        .filter(
+            Reserves.carro_id == nou_carro_id,
+            Reserves.data_inici < nova_data_final,
+            Reserves.data_final > nova_data_inici,
+            ~((Reserves.carro_id == reserva.carro_id) & (Reserves.data_inici == reserva.data_inici))
+        )
+        .first()
+    )
+    if solapa:
+        raise HTTPException(status_code=409, detail="El carro no està disponible en aquest període")
+    
+    # Aplicar canvis
+    reserva.carro_id = nou_carro_id
+    reserva.usuari_id = nou_usuari_id
+    reserva.data_inici = nova_data_inici
+    reserva.data_final = nova_data_final
+    
+    db.commit()
+    db.refresh(reserva)
+    
+    return {"msg": "Reserva modificada amb èxit"}
