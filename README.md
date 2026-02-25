@@ -1,37 +1,40 @@
-# Creació entorn virtual per instal·lar llibreries
+# RentacarroAPI
 
-```bash
-python -m virtualenv venv
-source venv/Script/activate
-```
+API REST per gestionar el lloguer de carros. Permet administrar vehicles, reserves i consultar disponibilitat.
 
-# Instal·lacions
+## Tecnologies
+- Python 3.11+
+- FastAPI
+- SQLAlchemy
+- MySQL
+- Pydantic
+- Uvicorn
 
-```bash
-pip install fastapi uvicorn sqlalchemy psycopg2 fastapi-utils pymysql python-dotenv
-```
+## Endpoints
 
-# Freeze dels requirements
-```bash
-pip freeze > requirements.txt
-```
+### Carros
+- GET    /carros                        Llista tots els carros
+- POST   /carros/disponibilitat         Consulta carros disponibles per període
 
-# Arrencar el servidor
+### Reserves
+- GET    /reserves/{data}               Llista reserves d'un període
+- POST   /reserves                      Crea una nova reserva
+- PUT    /reserves/{carro_id}/{data}    Modifica una reserva
+- DELETE /reserves/{carro_id}/{data}    Elimina una reserva
 
-```bash
-uvicorn entrypoint:app --reload
-```
-Funciona com a "healthcheck".
+## Estructura del projecte
 
-* Servidor: `http://127.0.0.1:8000`
-* Documentació: `http://127.0.0.1:8000/docs`
-
-# Iniciar Git i primer commit
-
-```bash
-git init
-git add .
-git commit -m "first commit"
-
-```
-També he creat un arxiu .gitignore per ignorar la carpeta de l'entorn virtual i els arxius compilats/caché de python generats automàticament.
+rentacarro-api/
+├── app/
+│   ├── routers/
+│   │   ├── carros.py
+│   │   └── reserves.py
+│   └── services/
+│       ├── carros.py
+│       └── reserves.py
+├── models.py
+├── schemas.py
+├── database.py
+├── main.py
+├── requirements.txt
+└── .env
