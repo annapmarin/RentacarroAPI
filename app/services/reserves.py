@@ -3,7 +3,7 @@ from sqlalchemy import func
 from datetime import datetime, timedelta
 from fastapi import HTTPException
 from models import Carro, Reserves, Usuaris
-from schemas import ReservaCreate, ReservaUpdate
+from schemas import ReservaCreate, ReservaUpdate, ReservaDelete
 
 def get_reserves_per_periode(db: Session, data: str):
     try:
@@ -131,3 +131,21 @@ def modificar_reserva(db: Session, carro_id: int, data_inici: datetime, payload:
     db.refresh(reserva)
     
     return {"msg": "Reserva modificada amb èxit"}
+
+def eliminar_reserva(db: Session, carro_id: int, data_inici: datetime):
+    data_inici = data_inici.replace(tzinfo=None)
+    
+    # Comprovar que la reserva existeix
+    reserva = (
+        db.query(Reserves)
+        .filter(
+            Reserves.carro_id == carro_id,
+            Reserves.data_inici == data_inici
+        )
+        .first()
+    )
+    if not reserva:
+        raise HTTPException(status_code=404, detail="No s'ha trobat la reserva a eliminar")
+    
+    db.delete(reserva)
+    db.commit()

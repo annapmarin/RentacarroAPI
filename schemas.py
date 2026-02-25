@@ -23,6 +23,10 @@ class ReservaUpdate(BaseModel):
     usuari_id: Optional[int] = None
     data_inici: Optional[datetime] = None
     data_final: Optional[datetime] = None
+    
+class ReservaDelete(BaseModel):
+    carro_id: int
+    data_inici: datetime
 
 class ReservaPeriodeResponse(BaseModel):
     nom_carro: str
