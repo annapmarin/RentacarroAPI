@@ -9,7 +9,7 @@ router = APIRouter(prefix="/reserves", tags=["reserves"])
 
 @router.get("/{data}", response_model=list[ReservaPeriodeResponse],
             summary="Obtenir reserves segons període",
-            description="Retorna totes les reserves actives en un període determinat a partir d'una data.")
+            description="Retorna totes les reserves actives en un període de 7 dies des de la data inserida.")
 def get_reserves_periode(data: str, db: Session = Depends(get_db)):
     return reserves_service.get_reserves_per_periode(db, data)
 
@@ -23,13 +23,13 @@ def crear_reserva(payload: ReservaCreate, db: Session = Depends(get_db)):
             summary="Modificar una reserva existent",
             description="Modifica els detalls d'una reserva existent identificada pel carro i la data d'inici.")
 def put_reserva(carro_id: int, data_inici: str, payload: ReservaUpdate, db: Session = Depends(get_db)):
-    data_inici = datetime.fromisoformat(data_inici)
-    return reserves_service.modificar_reserva(db, carro_id, data_inici, payload)
+    data_inici_dt = datetime.fromisoformat(data_inici)
+    return reserves_service.modificar_reserva(db, carro_id, data_inici_dt, payload)
 
 @router.delete("/{carro_id}/{data_inici}", status_code=204,
             summary="Eliminar una reserva",
             description="Elimina una reserva existent identificada pel carro i la data d'inici.")
 def delete_reserva(carro_id: int, data_inici: str, db: Session = Depends(get_db)):
-    data_inici = datetime.fromisoformat(data_inici)
-    reserves_service.eliminar_reserva(db, carro_id, data_inici)
+    data_inici_dt = datetime.fromisoformat(data_inici)
+    reserves_service.eliminar_reserva(db, carro_id, data_inici_dt)
     return Response(status_code=204)
